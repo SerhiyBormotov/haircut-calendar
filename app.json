@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "plugins": [
+      [
+        "expo-font",
+        {
+          "fonts": ["src/assets/fonts/Pacifico.ttf", "src/assets/fonts/Manrope.ttf"]
+        }
+      ]
+    ]
+  }
+}
