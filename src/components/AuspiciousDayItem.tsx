@@ -63,13 +63,13 @@ const styles = StyleSheet.create({
     marginLeft: 20,
   },
   date: {
-    fontSize: 30,
+    fontSize: 34,
     color: Color.dark,
     fontFamily: "Manrope",
     fontWeight: "bold",
   },
   condition: {
-    fontSize: 10,
+    fontSize: 14,
     color: "#fff",
     backgroundColor: Color.red,
     width: "100%",
@@ -81,9 +81,10 @@ const styles = StyleSheet.create({
   dayOfWeek: {
     letterSpacing: 2,
     fontFamily: "Pacifico",
+    fontSize: 18,
   },
   details: {
-    fontSize: 12,
+    fontSize: 15,
     color: "#000",
     fontFamily: "Manrope",
   },
