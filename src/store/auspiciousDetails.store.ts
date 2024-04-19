@@ -9,7 +9,7 @@ export const AuspiciousDetailsStore = types
     isPending: types.boolean,
     criteria: types.array(AuspiciousCriteriaModel),
     moonDays: types.array(types.number),
-    moonSign: types.number,
+    moonSigns: types.array(types.number),
     date: types.Date,
   })
   .actions((self) => {
@@ -17,6 +17,7 @@ export const AuspiciousDetailsStore = types
       self.isPending = true;
       self.criteria.clear();
       self.moonDays.clear();
+      self.moonSigns.clear();
 
       const date = self.date;
 
@@ -31,7 +32,10 @@ export const AuspiciousDetailsStore = types
         self.moonDays.push(auspiciousDateService.getNextMoonDay(moonDate.day));
       }
 
-      self.moonSign = moonDate.sign;
+      self.moonSigns.push(moonDate.sign);
+      if (moonDate.signChange) {
+        self.moonSigns.push(auspiciousDateService.getNextSign(moonDate.sign));
+      }
 
       self.criteria.push(
         ...auspiciousDateService.getAuspiciousDetails(moonDate),

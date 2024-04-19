@@ -36,7 +36,10 @@ const DateDetails: React.FC = observer(() => {
               Місячний день: {auspiciousDetails.moonDays.join(" - ")}
             </Text>
             <Text style={styles.detailsText}>
-              Місяць у знаку: {ZodiacString[auspiciousDetails.moonSign]}
+              Місяць у знаку:{" "}
+              {auspiciousDetails.moonSigns
+                .map((item) => ZodiacString[item])
+                .join(" - ")}
             </Text>
           </View>
           <View style={{ flex: 1 }}>

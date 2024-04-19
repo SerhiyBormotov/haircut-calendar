@@ -8,17 +8,14 @@ export interface IMoonDate {
   sign: number;
   isSunday: boolean;
   nextDayStart?: Date;
+  signChange?: Date;
 }
 
 export class MoonCalendar {
   constructor(private location: Location) {}
 
   async getMoonDate(date: Date): Promise<IMoonDate> {
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-
-    const toi = createTimeOfInterest.fromTime(year, month, day, 12);
+    const toi = createTimeOfInterest.fromDate(this.normilizeDate(date));
     const moon = createMoon(toi);
     const jd = toi.getJulianDay();
 
@@ -28,8 +25,7 @@ export class MoonCalendar {
     );
 
     //get zodiac sign
-    const { lon } = await moon.getGeocentricEclipticSphericalDateCoordinates();
-    const sign = Math.floor(lon / 30);
+    const sign = await this.getSignByDate(this.normilizeDate(date));
 
     const result: IMoonDate = {
       day: age,
@@ -44,9 +40,15 @@ export class MoonCalendar {
     } catch (e) {
       console.log(e.message);
     }
-    const nextMoonRise = this.convertToLocalTime(toiMoonRise);
-    if (nextMoonRise?.getDate() === day) {
+    const nextMoonRise = this.toiToLocalTime(toiMoonRise);
+    if (nextMoonRise?.getDate() === date.getDate()) {
       result.nextDayStart = nextMoonRise;
+    }
+
+    //get time of the moon sign change
+    const signChange = await this.getSignChangeTime(this.normilizeDate(date));
+    if (signChange) {
+      result.signChange = signChange;
     }
 
     return result;
@@ -60,16 +62,96 @@ export class MoonCalendar {
     return v;
   }
 
-  private convertToLocalTime(toi: TimeOfInterest | null): Date | null {
+  private toiToLocalTime(toi: TimeOfInterest | null): Date | null {
     if (!toi) {
       return null;
     }
 
+    const dateUTC = new Date(toi.getString());
+    return this.UTCToLocalTime(dateUTC);
+  }
+
+  private UTCToLocalTime(dateUTC: Date): Date {
     const timeZoneOffset = new Date().getTimezoneOffset();
-    const localTime = new Date(toi.getString());
+    const localTime = new Date(dateUTC.toISOString());
 
     localTime.setMinutes(localTime.getMinutes() - timeZoneOffset);
 
     return localTime;
+  }
+
+  private async getSignChangeTime(
+    date: Date,
+    endDate?: Date,
+  ): Promise<Date | null> {
+    const PRECISION = 1000 * 60 * 5;
+    if (!endDate) {
+      endDate = this.normilizeDate(date, 24);
+    }
+
+    const signStart = await this.getSignByDate(date);
+    const signEnd = await this.getSignByDate(endDate);
+
+    if (signStart === signEnd) {
+      return null;
+    } else if (endDate.getTime() - date.getTime() <= PRECISION) {
+      return date;
+    } else {
+      const midDate = new Date(
+        date.getTime() + (endDate.getTime() - date.getTime()) / 2,
+      );
+      const signMid = await this.getSignByDate(midDate);
+
+      if (signMid === signStart) {
+        return await this.getSignChangeTime(midDate, endDate);
+      } else {
+        return await this.getSignChangeTime(date, midDate);
+      }
+    }
+  }
+
+  private async getSignByDate(date: Date): Promise<number> {
+    const toi = createTimeOfInterest.fromDate(date);
+    const moon = createMoon(toi);
+    const { lon } = await moon.getGeocentricEclipticSphericalDateCoordinates();
+    return Math.floor(lon / 30);
+    // let result: number = 0;
+
+    // if (lon < 51.16 && lon > 33.18) {
+    //   result = 1;
+    // } else if (lon < 93.44) {
+    //   result = 2;
+    // } else if (lon < 119.48) {
+    //   result = 3;
+    // } else if (lon < 135.3) {
+    //   result = 4;
+    // } else if (lon < 173.34) {
+    //   result = 5;
+    // } else if (lon < 224.17) {
+    //   result = 6;
+    // } else if (lon < 242.57) {
+    //   result = 7;
+    // } else if (lon < 271.26) {
+    //   result = 8;
+    // } else if (lon < 302.49) {
+    //   result = 9;
+    // } else if (lon < 311.72) {
+    //   result = 10;
+    // } else if (lon < 348.58) {
+    //   result = 11;
+    // }
+
+    // return result;
+  }
+
+  private normilizeDate(date: Date, hours: number = 0) {
+    return new Date(
+      Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth(),
+        date.getUTCDate(),
+        hours,
+      ),
+    );
   }
 }

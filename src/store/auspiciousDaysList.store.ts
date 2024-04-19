@@ -37,7 +37,7 @@ export const AuspiciousDaysListStore = types
         if (auspiciousCheck.auspicious) {
           list.push({
             date: date as unknown as number,
-            condition: auspiciousCheck.condition,
+            condition: auspiciousCheck.condition as string,
             details: auspiciousCheck.details,
           });
         }

@@ -19,7 +19,7 @@ const AuspiciousDayItem = ({
   const { auspiciousDetails } = useStore();
   return (
     <Pressable
-      onLongPress={() => {
+      onPress={() => {
         auspiciousDetails.setDate(date);
         navigation.navigate("DateDetails");
       }}
@@ -69,12 +69,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   condition: {
-    fontSize: 14,
+    fontSize: 13,
     color: "#fff",
     backgroundColor: Color.red,
     width: "100%",
     textAlign: "center",
-    paddingHorizontal: 10,
+    paddingHorizontal: 5,
     fontFamily: "Manrope",
     fontWeight: "bold",
   },
